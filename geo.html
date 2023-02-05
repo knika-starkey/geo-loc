@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="OpenLayers-2.13.1/OpenLayers.js"></script>
+  </head>
+  <body>
+    <button id="find">Показать широту и долготу</button><br />
+    <p id="status"></p>
+    <a id="map" target="_blank"></a>
+    <div id="demoMap" style="height: 650px"></div>
+    <script>
+      let latitude = 47.35387; // широта
+      let longitude = 8.43609; // долгота
+      let zoom = 18; // зум
+
+      let fromProjection = new OpenLayers.Projection("EPSG:4326"); // Преобразование из WGS 1984
+      let toProjection = new OpenLayers.Projection("EPSG:900913"); // к сферической проекции Меркатора
+
+      // расчет позиционирования
+      let position = new OpenLayers.LonLat(longitude, latitude).transform(
+        fromProjection,
+        toProjection
+      );
+
+      map = new OpenLayers.Map("demoMap");
+      let mapnik = new OpenLayers.Layer.OSM();
+      map.addLayer(mapnik);
+      status.innerHTML = "";
+      // добавляем маркеры
+      let markers = new OpenLayers.Layer.Markers("Markers");
+      map.addLayer(markers);
+      markers.addMarker(new OpenLayers.Marker(position));
+      map.setCenter(position, zoom);
+
+      function geoFindMe() {
+        let status = document.querySelector("#status");
+        let mapLink = document.querySelector("#map");
+        mapLink.href = "";
+        mapLink.innerHTML = "";
+        function success(position) {
+          let latitude = position.coords.latitude;
+          let longitude = position.coords.longitude;
+          status.innerHTML = "";
+          mapLink.href =
+            "https://www.openstreetmap.org/#map=18/" +
+            latitude +
+            "/" +
+            longitude;
+          mapLink.innerHTML =
+            "Latitude:" + latitude + " °, Longitude: " + longitude + "°";
+
+          // перерасчет позиционирования
+          position = new OpenLayers.LonLat(longitude, latitude).transform(
+            fromProjection,
+            toProjection
+          );
+
+          // добавляем маркеры
+          markers.addMarker(new OpenLayers.Marker(position));
+          map.setCenter(position, zoom);
+        }
+
+        function error() {
+          status.innerHTML = "Невозможно получить данные геолокации.";
+        }
+
+        if (!navigator.geolocation) {
+          status.innerHTML = "Геолокация не поддерживается вашим браузером.";
+        } else {
+          status.innerHTML = "Идет поиск…";
+          navigator.geolocation.getCurrentPosition(success, error);
+        }
+      }
+
+      document.querySelector("#find").addEventListener("click", geoFindMe);
+    </script>
+  </body>
+</html>
