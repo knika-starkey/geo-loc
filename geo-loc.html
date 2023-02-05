@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button onclick="getLocation()">getLocation</button>
+    <div id="pos"></div>
+    <div id="dist"></div>
+
+    <script>
+      let posElemen = document.getElementById("pos");
+      let distElement = document.getElementById("dist");
+      let latitude = 50.02513; // широта
+      let longitude = 36.25694; // долгота
+
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+          posElemen.innerHTML = "Геолокация не підтримуеться вашим браузером.";
+        }
+      }
+
+      function showPosition(position) {
+        posElemen.innerHTML =
+          "Широта: " +
+          position.coords.latitude +
+          "<br>Долгота: " +
+          position.coords.longitude;
+
+        distElement.innerHTML = getDistanceFromLatLonInKm(
+          position.coords.latitude,
+          position.coords.longitude,
+          latitude,
+          longitude
+        );
+      }
+
+      function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        let R = 6371; // Radius of the earth in km
+        let dLat = deg2rad(lat2 - lat1); // deg2rad below
+        let dLon = deg2rad(lon2 - lon1);
+        let a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(deg2rad(lat1)) *
+            Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        let d = R * c; // Distance in km
+        return d;
+      }
+
+      function deg2rad(deg) {
+        return deg * (Math.PI / 180);
+      }
+    </script>
+  </body>
+</html>
